@@ -39,7 +39,7 @@ function SignupForm() {
     });
 
     if (error) throw error;
-    router.push('/auth/sign-up-success');
+    router.push('/profile'); // redirect to profile page
   };
 
   return (
