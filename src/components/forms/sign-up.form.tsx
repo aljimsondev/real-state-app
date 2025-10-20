@@ -35,7 +35,7 @@ function SignupForm() {
     const { error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
-      options: { emailRedirectTo: `${window.location.origin}/confirm-account` },
+      options: { emailRedirectTo: `${window.location.origin}/profile` },
     });
 
     if (error) throw error;
