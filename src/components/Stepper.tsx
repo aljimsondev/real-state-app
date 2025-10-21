@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button';
+import { Loader } from 'lucide-react';
 import { AnimatePresence, motion, Variants } from 'motion/react';
 import React, {
   Children,
@@ -22,6 +24,7 @@ interface StepperProps extends HTMLAttributes<HTMLDivElement> {
   backButtonText?: string;
   nextButtonText?: string;
   disableStepIndicators?: boolean;
+  isSubmitting?: boolean;
   renderStepIndicator?: (props: {
     step: number;
     currentStep: number;
@@ -44,6 +47,7 @@ export default function Stepper({
   nextButtonText = 'Continue',
   disableStepIndicators = false,
   renderStepIndicator,
+  isSubmitting = false,
   ...rest
 }: StepperProps) {
   const [currentStep, setCurrentStep] = useState<number>(initialStep);
@@ -63,6 +67,7 @@ export default function Stepper({
   };
 
   const handleBack = () => {
+    if (isSubmitting) return;
     if (currentStep > 1) {
       setDirection(-1);
       updateStep(currentStep - 1);
@@ -78,7 +83,7 @@ export default function Stepper({
 
   const handleComplete = () => {
     setDirection(1);
-    updateStep(totalSteps + 1);
+    // updateStep(totalSteps + 1);
   };
 
   return (
@@ -142,25 +147,31 @@ export default function Stepper({
               }`}
             >
               {currentStep !== 1 && (
-                <button
+                <Button
                   onClick={handleBack}
-                  className={`duration-350 rounded px-2 py-1 transition ${
-                    currentStep === 1
-                      ? 'pointer-events-none opacity-50 text-neutral-400'
-                      : 'text-neutral-400 hover:text-neutral-700'
-                  }`}
                   {...backButtonProps}
+                  className="rounded-lg"
+                  variant="outline"
                 >
                   {backButtonText}
-                </button>
+                </Button>
               )}
-              <button
+              <Button
                 onClick={isLastStep ? handleComplete : handleNext}
-                className="duration-350 flex items-center justify-center rounded-full bg-green-500 py-1.5 px-3.5 font-medium tracking-tight text-white transition hover:bg-green-600 active:bg-green-700"
                 {...nextButtonProps}
+                className="rounded-lg"
+                variant={isLastStep ? 'default' : 'outline'}
+                disabled={nextButtonProps.disabled || isSubmitting}
               >
-                {isLastStep ? 'Complete' : nextButtonText}
-              </button>
+                {isSubmitting && isLastStep && (
+                  <Loader className="animate-spin" />
+                )}
+                {isLastStep
+                  ? isSubmitting
+                    ? 'Submitting...'
+                    : 'Complete'
+                  : nextButtonText}
+              </Button>
             </div>
           </div>
         )}
@@ -293,9 +304,10 @@ function StepIndicator({
   };
 
   return (
-    <motion.div
+    <motion.button
       onClick={handleClick}
-      className="relative cursor-pointer outline-none focus:outline-none"
+      disabled={disableStepIndicators}
+      className="relative cursor-pointer outline-none focus:outline-none disabled:pointer-events-none disabled:select-none"
       animate={status}
       initial={false}
     >
@@ -316,7 +328,7 @@ function StepIndicator({
           <span className="text-sm">{step}</span>
         )}
       </motion.div>
-    </motion.div>
+    </motion.button>
   );
 }
 
