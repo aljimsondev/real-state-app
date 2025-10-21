@@ -27,6 +27,11 @@ function SignupForm() {
   const form = useForm<SignupFormData>({
     resolver: zodResolver(signupFormSchema),
     mode: 'all',
+    defaultValues: {
+      confirmPassword: '',
+      email: '',
+      password: '',
+    },
   });
 
   const handleRegistration = async (data: SignupFormData) => {
