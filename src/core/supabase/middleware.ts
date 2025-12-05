@@ -1,7 +1,5 @@
-import { AccessController } from '@/core/controller/access-controller';
 import { createServerClient } from '@supabase/ssr';
 import { NextRequest, NextResponse } from 'next/server';
-const accessController = new AccessController();
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -41,21 +39,12 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!accessController.hasAccess(request)) {
+  if (!user && !request.nextUrl.pathname.startsWith('/auth')) {
+    // no user, potentially respond by redirecting the user to the login page
+    const url = request.nextUrl.clone();
+    url.pathname = '/auth/sign-in';
+    return NextResponse.redirect(url);
   }
-
-  // if (request.nextUrl.pathname.startsWith('/')) return NextResponse.next();
-
-  // if (
-  //   !user &&
-  //   !request.nextUrl.pathname.startsWith('/auth') &&
-  //   !request.nextUrl.pathname.startsWith('/profile')
-  // ) {
-  //   // no user, potentially respond by redirecting the user to the login page
-  //   const url = request.nextUrl.clone();
-  //   url.pathname = '/auth/sign-in';
-  //   return NextResponse.redirect(url);
-  // }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:
