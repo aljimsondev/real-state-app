@@ -19,10 +19,12 @@ export const profiles = pgTable('profiles', {
   full_name: varchar({ length: 255 }),
   avatar_url: text(),
   phone: varchar({ length: 50 }),
+  email: varchar({ length: 50 }),
   bio: text(),
   is_agent: boolean().default(false),
-  company_name: varchar({ length: 255 }),
-  license_number: varchar({ length: 100 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+
+export type Profile = typeof profiles.$inferSelect;
+export type NewProfile = typeof profiles.$inferInsert;
