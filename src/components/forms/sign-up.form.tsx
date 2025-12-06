@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
@@ -9,11 +10,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Typography } from '@/components/ui/typography';
-import { useForm } from 'react-hook-form';
-
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Typography } from '@/components/ui/typography';
 import { createClient } from '@/core/supabase/client';
 import {
   SignupFormData,
@@ -21,6 +19,8 @@ import {
 } from '@/lib/form-schema/signup-form.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import SocialAuthProviders from './social-auth';
 
 function SignupForm() {
   const router = useRouter();
@@ -107,7 +107,14 @@ function SignupForm() {
                 </FormItem>
               )}
             />
-            <Button className="w-full">Create an Account</Button>
+            <Button className="w-full" type="submit">
+              Create an Account
+            </Button>
+            <div className="mt-4 w-full flex items-center justify-center text-center">
+              Or <br />
+              Continue using
+            </div>
+            <SocialAuthProviders />
           </Form>
         </form>
       </CardContent>
