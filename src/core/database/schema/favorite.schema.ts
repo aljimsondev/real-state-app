@@ -7,6 +7,7 @@ import {
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core';
+import { authenticatedRole } from 'drizzle-orm/supabase';
 
 // Favorites Table
 export const favorites = pgTable(
@@ -24,19 +25,19 @@ export const favorites = pgTable(
   (t) => [
     pgPolicy('User can view their favourites', {
       as: 'restrictive',
-      to: 'authenticated',
+      to: authenticatedRole,
       for: 'select',
       using: sql`(select auth.uid()) = user_id`,
     }),
     pgPolicy('User can update their own favourites', {
       as: 'restrictive',
-      to: 'authenticated',
+      to: authenticatedRole,
       for: 'update',
       using: sql`(select auth.uid()) = user_id`,
     }),
     pgPolicy('User can delete their own favorites', {
       as: 'permissive',
-      to: 'authenticated',
+      to: authenticatedRole,
       for: 'delete',
       using: sql`(select auth.uid()) = user_id`,
     }),

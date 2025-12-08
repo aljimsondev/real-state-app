@@ -1,4 +1,5 @@
 import { users } from '@/core/database/schema/auth-schema';
+import { sql } from 'drizzle-orm';
 import {
   boolean,
   decimal,
@@ -6,12 +7,14 @@ import {
   integer,
   jsonb,
   pgEnum,
+  pgPolicy,
   pgTable,
   text,
   timestamp,
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
+import { authenticatedRole } from 'drizzle-orm/supabase';
 
 // Enums for better type safety
 export const propertyTypeEnum = pgEnum('property_type', [
@@ -113,15 +116,42 @@ export const listing = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
-  (table) => ({
-    listing_user_idx: index('idx_listing_user_id').on(table.user_id),
-    listing_status_idx: index('idx_listing_status').on(table.status),
-    listing_category_idx: index('idx_listing_category').on(table.category),
-    listing_city_idx: index('idx_listing_city').on(table.city),
-    listing_price_idx: index('idx_listing_price').on(table.price),
-    listing_property_type_idx: index('idx_listing_property_type').on(
-      table.property_type,
-    ),
-    listing_created_at_idx: index('idx_listing_created_at').on(table.createdAt),
-  }),
+  (table) => [
+    // Indexes
+    index('idx_listing_user_id').on(table.user_id),
+    index('idx_listing_status').on(table.status),
+    index('idx_listing_category').on(table.category),
+    index('idx_listing_city').on(table.city),
+    index('idx_listing_price').on(table.price),
+    index('idx_listing_property_type').on(table.property_type),
+    index('idx_listing_created_at').on(table.createdAt),
+    // Policies
+    pgPolicy('Users can view listings', {
+      to: 'public',
+      for: 'select',
+      as: 'restrictive',
+      using: sql`status = 'active'`,
+    }),
+    pgPolicy('User can edit their own listing', {
+      as: 'permissive',
+      for: 'update',
+      to: authenticatedRole,
+      withCheck: sql`(select auth.uid()) = user_id`,
+    }),
+    pgPolicy('User can insert new listing', {
+      as: 'permissive',
+      for: 'insert',
+      to: authenticatedRole,
+      withCheck: sql`(select auth.uid()) = user_id`,
+    }),
+    pgPolicy('User can delete their listing', {
+      as: 'permissive',
+      for: 'delete',
+      to: authenticatedRole,
+      using: sql`(select auth.uid()) = user_id`,
+    }),
+  ],
 );
+
+export type NewListing = typeof listing.$inferInsert;
+export type Listing = typeof listing.$inferSelect;
