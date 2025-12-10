@@ -1,4 +1,4 @@
-import { users } from '@/core/database/schema/auth-schema';
+import { users } from '@/core/database/auth-schema';
 import { sql } from 'drizzle-orm';
 import {
   boolean,
